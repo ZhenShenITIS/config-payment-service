@@ -1,0 +1,43 @@
+networks:
+  shop-network:
+    external: true
+
+
+services:
+  app:
+    build:
+      context: .
+      args:
+        GITHUB_TOKEN: ${GITHUB_TOKEN}
+        GITHUB_USERNAME: ${GITHUB_USERNAME}
+    container_name: bot-payment
+    depends_on:
+      - db
+    networks:
+      - shop-network
+    env_file:
+      - .env
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/shop_db
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+    restart: always
+    ports:
+      - "${SERVER_PORT}:${SERVER_PORT}"
+
+  db:
+    image: postgres:17-alpine
+    container_name: postgres-payment
+    restart: always
+    networks:
+      - shop-network
+    environment:
+      POSTGRES_DB: shop_db
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+volumes:
+  pg_data:
+
+
